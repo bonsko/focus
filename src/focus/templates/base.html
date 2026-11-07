@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <title>{% block title %}focus{% endblock %}</title>
-  <link rel="stylesheet" href="/static/css/rose-pine.css?v=20261107c">
+  <link rel="stylesheet" href="/static/css/rose-pine.css?v=20261107d">
   <script src="/static/vendor/htmx.min.js" defer></script>
-  <script src="/static/js/confetti.js?v=20261107c" defer></script>
-  <script src="/static/js/app.js?v=20261107c" defer></script>
+  <script src="/static/js/confetti.js?v=20261107d" defer></script>
+  <script src="/static/js/app.js?v=20261107d" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -17,7 +17,12 @@
 
     <nav class="projects" aria-label="projects">
       {% for p in projects %}
-      <a class="project{% if project and p['id'] == project['id'] %} active{% endif %}" href="/p/{{ p['id'] }}">{{ p['name'] }}</a>
+      <div class="project-row">
+        <a class="project{% if project and p['id'] == project['id'] %} active{% endif %}" href="/p/{{ p['id'] }}">{{ p['name'] }}</a>
+        <button class="quiet tiny" type="button" title="delete project" aria-label="delete project {{ p['name'] }}"
+                hx-post="/projects/{{ p['id'] }}/delete" hx-swap="none"
+                hx-confirm="delete “{{ p['name'] }}”? it has to be empty.">×</button>
+      </div>
       {% endfor %}
       <form class="new-project" method="post" action="/projects">
         <input name="name" placeholder="+ project" maxlength="40" autocomplete="off" aria-label="new project">

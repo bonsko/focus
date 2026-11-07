@@ -70,6 +70,23 @@ document.addEventListener('focus:celebrate', () => {
 });
 document.addEventListener('focus:close-sheet', closeSheet);
 
+// small transient toast, used by 409s (e.g. deleting a project that still has tasks)
+document.addEventListener('focus:notice', (event) => {
+  const message = event.detail && event.detail.message;
+  if (!message) return;
+  let toast = document.getElementById('toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.setAttribute('role', 'status');
+    document.body.append(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add('on');
+  clearTimeout(toast._hide);
+  toast._hide = setTimeout(() => toast.classList.remove('on'), 4200);
+});
+
 document.addEventListener('htmx:beforeSwap', () => {
   selectedId = document.querySelector('#list .task.sel')?.dataset.id || null;
 });

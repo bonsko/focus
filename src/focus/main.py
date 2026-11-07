@@ -1,5 +1,6 @@
 """focus — a quiet task list. FastAPI + sqlite + htmx, no build step."""
 
+import json
 import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -199,6 +200,31 @@ def new_project(name: str = Form(), con=Depends(db.get_db), user=Depends(current
         ).fetchone()
         return RedirectResponse(f"/p/{row['id']}", status_code=303)
     return goto_project(con, user)
+
+
+@app.post("/projects/{project_id}/delete")
+def delete_project(project_id: int, con=Depends(db.get_db), user=Depends(current_user)):
+    project = owned(con, user, "projects", project_id)
+    total = con.execute(
+        "SELECT count(*) FROM projects WHERE user_id = ?", (user["id"],)
+    ).fetchone()[0]
+    left = con.execute(
+        "SELECT count(*) FROM tasks WHERE project_id = ? AND user_id = ?",
+        (project["id"], user["id"]),
+    ).fetchone()[0]
+    if total <= 1:
+        return notice("the last project has to stay — there is nowhere else to put tasks.")
+    if left:
+        return notice(f"{left} task{'' if left == 1 else 's'} still in {project['name']} — move "
+                      f"{'it' if left == 1 else 'them'} to another project first.")
+    with con:
+        con.execute("DELETE FROM projects WHERE id = ? AND user_id = ?", (project["id"], user["id"]))
+    return Response(status_code=200, headers={"HX-Redirect": "/"})
+
+
+def notice(message: str) -> Response:
+    """200 + a toast event; a 4xx would be treated as an error by htmx and stay silent."""
+    return Response(status_code=200, headers={"HX-Trigger": json.dumps({"focus:notice": {"message": message}})})
 
 
 @app.get("/search")
