@@ -372,6 +372,16 @@ kbd {
 }
 .sheet.wide { width: min(960px, 96vw); }
 .sheet:empty { display: none; }
+/* a sheet swapped into a sheet is content, not a second panel */
+.sheet .sheet {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  animation: none;
+}
 
 .sheet-inner { display: flex; flex-direction: column; min-height: 100%; }
 .sheet-tools { display: flex; gap: 8px; align-items: center; }
