@@ -80,28 +80,45 @@ def steps(text: str) -> list[str]:
     return [b.strip() for b in bullets if b.strip()][:8]
 
 
+PLAIN = (
+    "Write plain text only: no markdown at all — no headings with #, no bold with **, "
+    "no backticks, no tables, no bullet dashes. Separate ideas with blank lines. If you "
+    "must enumerate, write lines like '1. ...'. Links as bare urls.\n"
+)
+
+
 def split_prompt(task: sqlite3.Row) -> str:
     return (
         "Break this task into 3-8 small, concrete, doable steps for a person with ADHD.\n"
         "Each step must start with a verb and fit on one line.\n"
         f"Task: {task['title']}\nNotes: {task['notes'] or '(none)'}\n\n"
-        'Reply with ONLY a JSON array of strings, for example ["open the file", "rename the section"].'
+        "Reply with ONLY a JSON array of strings, no code fences, no prose before or after, "
+        'for example ["open the file", "rename the section"].'
     )
 
 
 def research_prompt(task: sqlite3.Row) -> str:
     return (
-        "Research the topic of this task and write a short briefing in markdown, at most 200 words, "
-        "with concrete facts and links where you have them. Begin directly with a markdown heading, "
-        "no preamble or closing remarks.\n"
+        PLAIN
+        + "Research the topic of this task and write a short briefing, at most 200 words, "
+        "with concrete facts and links where you have them. Begin directly with the first "
+        "fact: no preamble, no description of what you are about to do, no closing remarks.\n"
         f"Task: {task['title']}\nNotes: {task['notes'] or '(none)'}"
     )
 
 
+CHATTY = re.compile(r"^(here('|’)s|here is|sure|certainly|of course|below)\b[^\n]*:\s*$", re.I)
+
+
 def briefing(text: str) -> str:
-    """Drop the model's preamble; a briefing starts at its first heading."""
+    """Drop the model's preamble; a briefing starts at its first heading or fact."""
     heading = re.search(r"^#{1,6} ", text, re.M)
-    return text[heading.start() :] if heading else text
+    if heading:
+        text = text[heading.start() :]
+    lines = text.strip().splitlines()
+    if lines and CHATTY.match(lines[0].strip()):
+        lines = lines[1:]
+    return "\n".join(lines).strip()
 
 
 def run_job(job_id: int) -> None:

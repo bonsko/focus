@@ -21,6 +21,38 @@ function select(index) {
   tasks[selected].scrollIntoView({ block: 'nearest' });
 }
 
+const WIDE_KEY = 'focus.sheet.wide';
+
+function applyWide() {
+  const sheet = document.getElementById('sheet');
+  if (!sheet) return;
+  const wide = localStorage.getItem(WIDE_KEY) === '1';
+  sheet.classList.toggle('wide', wide);
+  const btn = sheet.querySelector('#wide-toggle');
+  if (btn) {
+    btn.textContent = wide ? 'narrower' : 'wider';
+    btn.setAttribute('aria-pressed', String(wide));
+  }
+}
+
+window.toggleWide = () => {
+  localStorage.setItem(WIDE_KEY, localStorage.getItem(WIDE_KEY) === '1' ? '0' : '1');
+  applyWide();
+};
+
+// field-sizing: content does this natively where supported; this is the fallback
+function fitNotes(el) {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight + 2, Math.round(window.innerHeight * 0.72)) + 'px';
+}
+
+document.addEventListener('input', (event) => {
+  if (event.target.matches && event.target.matches('.sheet textarea[name="notes"]')) fitNotes(event.target);
+});
+
+applyWide();
+
 let burstOrigin = null;
 
 // remember where the tick was at click time — the row is replaced by the swap,
@@ -44,6 +76,8 @@ document.addEventListener('htmx:beforeSwap', () => {
 
 document.addEventListener('htmx:afterSwap', (event) => {
   if (event.target.id === 'sheet') {
+    applyWide();
+    fitNotes(event.target.querySelector('textarea[name="notes"]'));
     event.target.querySelector('.sheet-title')?.focus();
     return;
   }

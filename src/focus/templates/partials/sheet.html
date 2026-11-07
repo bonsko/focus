@@ -1,7 +1,10 @@
-<aside id="sheet" class="sheet">
+<div class="sheet-inner">
   <div class="sheet-head">
     <span class="kicker">task</span>
-    <button class="quiet" type="button" onclick="closeSheet()">esc</button>
+    <div class="sheet-tools">
+      <button class="quiet" type="button" id="wide-toggle" onclick="toggleWide()" aria-pressed="false">wider</button>
+      <button class="quiet" type="button" onclick="closeSheet()">esc</button>
+    </div>
   </div>
 
   <form class="sheet-form" hx-post="/tasks/{{ task['id'] }}" hx-target="#list" hx-swap="innerHTML">
@@ -16,7 +19,7 @@
       <button class="quiet danger" type="button" hx-post="/tasks/{{ task['id'] }}/delete"
               hx-target="#list" hx-swap="innerHTML" hx-confirm="delete this task?">delete</button>
     </div>
-    <textarea name="notes" rows="6" placeholder="notes, half-thoughts, links…" aria-label="notes">{{ task['notes'] }}</textarea>
+    <textarea name="notes" rows="14" placeholder="notes, half-thoughts, links…" aria-label="notes">{{ task['notes'] }}</textarea>
   </form>
 
   <section class="subs">
@@ -37,4 +40,4 @@
     </div>
     <div id="ai-panel"></div>
   </section>
-</aside>
+</div>
