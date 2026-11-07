@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}settings · focus{% endblock %}
+{% block main %}
+<header class="page-head">
+  <h1>settings</h1>
+  <a class="back" href="/p/{{ projects[0]['id'] }}">← back</a>
+</header>
+
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+
+<form class="settings-form" method="post" action="/settings">
+  <label>
+    <span>display name</span>
+    <input name="display_name" value="{{ user['display_name'] }}" maxlength="40" autocomplete="nickname">
+  </label>
+  <label>
+    <span>theme</span>
+    <select name="theme">
+      <option value="auto"{% if user['theme'] == 'auto' %} selected{% endif %}>auto — follow the system</option>
+      <option value="light"{% if user['theme'] == 'light' %} selected{% endif %}>dawn — light</option>
+      <option value="dark"{% if user['theme'] == 'dark' %} selected{% endif %}>moon — dark</option>
+    </select>
+  </label>
+  <button class="quiet">save</button>
+</form>
+
+<form class="settings-form" method="post" action="/settings/avatar" enctype="multipart/form-data">
+  <label>
+    <span>avatar</span>
+    <input type="file" name="avatar" accept="image/*" required>
+  </label>
+  <button class="quiet">upload</button>
+  <small class="hint">scaled to 96px and stored locally.</small>
+</form>
+
+<form class="settings-form" method="post" action="/logout">
+  <button class="quiet danger">sign out</button>
+</form>
+{% endblock %}

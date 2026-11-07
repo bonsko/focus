@@ -1,0 +1,5 @@
+<li class="subtask{% if sub['done'] %} done shimmer{% endif %}">
+  <button class="tick small" hx-post="/subtasks/{{ sub['id'] }}/toggle" hx-target="closest .subtask" hx-swap="outerHTML"
+          aria-label="{{ 'untick' if sub['done'] else 'tick' }} {{ sub['title'] }}"></button>
+  <span class="title">{{ sub['title'] }}</span>
+</li>

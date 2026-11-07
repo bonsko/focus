@@ -1,0 +1,33 @@
+{% if job['status'] == 'running' %}
+<div id="ai-panel" class="ai-thinking" hx-get="/tasks/{{ task['id'] }}/ai?job={{ job['id'] }}"
+     hx-trigger="load delay:2s" hx-swap="outerHTML" role="status">
+  <span class="pulse"></span>
+  {{ 'splitting into steps…' if job['kind'] == 'split' else 'reading around…' }}
+  <small>hermes is thinking. a minute or two.</small>
+</div>
+{% elif job['status'] == 'error' %}
+<div id="ai-panel" class="ai-error" role="alert">
+  <p>{{ job['error'] }}</p>
+  <button class="quiet" hx-post="/tasks/{{ task['id'] }}/ai/{{ job['kind'] }}" hx-target="#ai-panel" hx-swap="innerHTML">try again</button>
+</div>
+{% elif job['kind'] == 'split' %}
+{% set found = job['result']|steps %}
+{% if found %}
+<div id="ai-panel" class="ai-steps">
+  <form hx-post="/tasks/{{ task['id'] }}/subtasks" hx-target="#subtasks" hx-swap="innerHTML">
+    <p class="hint">tick what is already done, edit anything, then add.</p>
+    {% for s in found %}
+    <label class="step-row">
+      <input type="checkbox" name="done" value="{{ loop.index0 }}">
+      <input type="text" name="step" value="{{ s }}" maxlength="200">
+    </label>
+    {% endfor %}
+    <button class="quiet" type="submit">add these steps</button>
+  </form>
+</div>
+{% else %}
+<div id="ai-panel" class="ai-error"><p>hermes sent no steps back. try again?</p></div>
+{% endif %}
+{% else %}
+<div id="ai-panel" class="ai-done">notes added.</div>
+{% endif %}

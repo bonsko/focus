@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" data-theme="{{ user['theme'] if user else 'auto' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>{% block title %}focus{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/rose-pine.css">
+  <script src="/static/vendor/htmx.min.js" defer></script>
+  <script src="/static/js/confetti.js" defer></script>
+  <script src="/static/js/app.js" defer></script>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" href="/">focus</a>
+
+    <nav class="projects" aria-label="projects">
+      {% for p in projects %}
+      <a class="project{% if project and p['id'] == project['id'] %} active{% endif %}" href="/p/{{ p['id'] }}">{{ p['name'] }}</a>
+      {% endfor %}
+      <form class="new-project" method="post" action="/projects">
+        <input name="name" placeholder="+ project" maxlength="40" autocomplete="off" aria-label="new project">
+      </form>
+    </nav>
+
+    <div class="side-foot">
+      <form method="post" action="/settings/theme" class="theme-form">
+        <input type="hidden" name="back" value="{{ request.url.path }}">
+        {% set order = {'auto': 'light', 'light': 'dark', 'dark': 'auto'} %}
+        <input type="hidden" name="theme" value="{{ order[user['theme']] if user else 'auto' }}">
+        <button class="quiet theme-toggle" title="theme: {{ user['theme'] if user else 'auto' }}">
+          {{ {'auto': '◐', 'light': '☀', 'dark': '☾'}[user['theme']] if user else '◐' }}
+          <span>{{ user['theme'] if user else 'auto' }}</span>
+        </button>
+      </form>
+      <a class="me" href="/settings">
+        {% if user and user['avatar'] %}
+        <img class="avatar" src="/avatars/{{ user['avatar'] }}" alt="" width="22" height="22">
+        {% else %}
+        <span class="avatar initial">{{ user['display_name']|initial if user else '?' }}</span>
+        {% endif %}
+        <span class="me-name">{{ user['display_name'] if user else '' }}</span>
+      </a>
+    </div>
+  </aside>
+
+  <main class="main">
+    {% block main %}{% endblock %}
+  </main>
+</div>
+
+<aside id="sheet" class="sheet" aria-live="polite"></aside>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{% if query %}
+<p class="search-note">searching “{{ query }}” — <button class="link" hx-get="/search" hx-target="#list" hx-swap="innerHTML">clear</button></p>
+{% endif %}
+{% if not tasks %}
+<p class="empty">{{ 'nothing found.' if query else 'nothing here. that is allowed.' }}</p>
+{% else %}
+<ul class="tasks">
+  {% for t in tasks %}
+  {% include "partials/task_row.html" %}
+  {% endfor %}
+</ul>
+{% endif %}

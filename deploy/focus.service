@@ -1,0 +1,17 @@
+[Unit]
+Description=focus — a quiet task list
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# adjust if the repo lives elsewhere; uv must be on PATH
+WorkingDirectory=%h/projects/focus
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/usr/sbin:/bin
+Environment=FOCUS_HOME=%h/.local/share/focus
+ExecStart=/usr/bin/env uv run --frozen uvicorn focus.main:app --host 127.0.0.1 --port 8787
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target

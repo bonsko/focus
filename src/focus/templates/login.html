@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>focus</title>
+  <link rel="stylesheet" href="/static/css/rose-pine.css">
+</head>
+<body class="login-page">
+  <main class="login">
+    <h1>focus</h1>
+    <p class="tagline">a quiet place for the next thing.</p>
+    <form method="post" action="/login">
+      <input name="username" placeholder="name" autocomplete="username" maxlength="32" required autofocus>
+      <input type="password" name="password" placeholder="password" autocomplete="current-password" required>
+      <button>enter</button>
+    </form>
+    {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <p class="hint">no account needed. the name you type becomes yours.</p>
+  </main>
+</body>
+</html>

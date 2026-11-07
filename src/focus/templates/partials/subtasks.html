@@ -1,0 +1,4 @@
+{% for sub in subtasks %}
+{% include "partials/subtask.html" %}
+{% endfor %}
+{% if clear_ai %}<div id="ai-panel" hx-swap-oob="true"></div>{% endif %}

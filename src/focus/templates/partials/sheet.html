@@ -1,0 +1,40 @@
+<aside id="sheet" class="sheet">
+  <div class="sheet-head">
+    <span class="kicker">task</span>
+    <button class="quiet" type="button" onclick="closeSheet()">esc</button>
+  </div>
+
+  <form class="sheet-form" hx-post="/tasks/{{ task['id'] }}" hx-target="#list" hx-swap="innerHTML">
+    <input class="sheet-title" name="title" value="{{ task['title'] }}" maxlength="500" aria-label="task title">
+    <div class="sheet-meta">
+      <select name="project_id" aria-label="project">
+        {% for p in projects %}
+        <option value="{{ p['id'] }}"{% if p['id'] == task['project_id'] %} selected{% endif %}>{{ p['name'] }}</option>
+        {% endfor %}
+      </select>
+      <button class="quiet" type="submit">save</button>
+      <button class="quiet danger" type="button" hx-post="/tasks/{{ task['id'] }}/delete"
+              hx-target="#list" hx-swap="innerHTML" hx-confirm="delete this task?">delete</button>
+    </div>
+    <textarea name="notes" rows="6" placeholder="notes, half-thoughts, links…" aria-label="notes">{{ task['notes'] }}</textarea>
+  </form>
+
+  <section class="subs">
+    <h2>steps</h2>
+    <ul id="subtasks" class="subtasks">
+      {% include "partials/subtasks.html" %}
+    </ul>
+    <form class="sub-add" hx-post="/tasks/{{ task['id'] }}/subtasks" hx-target="#subtasks" hx-swap="innerHTML"
+          hx-on::after-request="if (event.detail.successful) this.reset()">
+      <input name="step" placeholder="+ step" maxlength="200" autocomplete="off" aria-label="new step">
+    </form>
+  </section>
+
+  <section class="ai">
+    <div class="ai-actions">
+      <button class="quiet" hx-post="/tasks/{{ task['id'] }}/ai/split" hx-target="#ai-panel" hx-swap="innerHTML">split into small steps</button>
+      <button class="quiet" hx-post="/tasks/{{ task['id'] }}/ai/research" hx-target="#ai-panel" hx-swap="innerHTML">research this</button>
+    </div>
+    <div id="ai-panel"></div>
+  </section>
+</aside>
