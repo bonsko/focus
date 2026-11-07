@@ -112,8 +112,14 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
 .shell {
   display: grid;
   grid-template-columns: 208px minmax(0, 1fr);
+  align-items: start;
   min-height: 100vh;
+  overflow-x: clip;
 }
+
+/* explicit placement: nothing in the content can push these around */
+.sidebar { grid-column: 1; grid-row: 1; }
+.main { grid-column: 2; grid-row: 1; }
 
 .sidebar {
   position: sticky;
@@ -394,8 +400,18 @@ kbd {
 .sheet-meta select { font-size: 12.5px; padding: 4px 8px; border-radius: 6px; color: var(--subtle); }
 .sheet-meta button[type="submit"] { margin-left: auto; }
 
+.sheet textarea,
+.ai-panel,
+.ai-done,
+.ai-error,
+.ai-steps {
+  overflow-wrap: anywhere;
+}
+
 .sheet textarea {
   font-size: 13.5px;
+  max-height: 62vh;
+  overflow-y: auto;
   line-height: 1.65;
   background: var(--base);
   border-color: var(--hl-low);
@@ -518,9 +534,14 @@ kbd {
 .settings-form button { align-self: flex-start; }
 
 @media (max-width: 720px) {
-  .shell { grid-template-columns: 1fr; }
+  .shell { grid-template-columns: minmax(0, 1fr); }
   .sidebar {
-    position: static;
+    grid-column: 1;
+    grid-row: 1;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--base);
     height: auto;
     flex-direction: row;
     align-items: center;
@@ -535,7 +556,7 @@ kbd {
   .new-project { width: 100px; }
   .side-foot { margin: 0 0 0 auto; flex-direction: row; align-items: center; }
   .theme-form button span { display: none; }
-  .main { padding: 28px 18px 80px; }
+  .main { grid-column: 1; grid-row: 2; padding: 28px 18px 80px; }
   .hints { display: none; }
   .sheet { border-left: 0; }
 }
