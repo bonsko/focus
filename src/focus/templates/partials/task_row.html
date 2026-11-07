@@ -1,6 +1,7 @@
 <li class="task{% if t['status'] == 'done' %} done{% endif %}" data-id="{{ t['id'] }}"
     hx-get="/tasks/{{ t['id'] }}" hx-target="#sheet" hx-swap="innerHTML">
   <button class="tick" hx-post="/tasks/{{ t['id'] }}/toggle" hx-target="#list" hx-swap="innerHTML"
+          onclick="event.stopPropagation()"
           aria-label="{{ 'reopen' if t['status'] == 'done' else 'complete' }} {{ t['title'] }}"></button>
   <span class="title">{{ t['title'] }}</span>
   {% if query %}<span class="where">{{ t['project'] }}</span>{% endif %}

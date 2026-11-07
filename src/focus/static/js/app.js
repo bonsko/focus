@@ -21,7 +21,21 @@ function select(index) {
   tasks[selected].scrollIntoView({ block: 'nearest' });
 }
 
-document.addEventListener('focus:celebrate', () => window.burst && window.burst());
+let burstOrigin = null;
+
+// remember where the tick was at click time — the row is replaced by the swap,
+// so the element is detached by the time the celebrate event arrives
+document.addEventListener('click', (event) => {
+  const tick = event.target.closest && event.target.closest('.tick');
+  if (!tick) return;
+  const r = tick.getBoundingClientRect();
+  burstOrigin = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+}, true);
+
+document.addEventListener('focus:celebrate', () => {
+  if (window.burst) window.burst(burstOrigin);
+  burstOrigin = null;
+});
 document.addEventListener('focus:close-sheet', closeSheet);
 
 document.addEventListener('htmx:beforeSwap', () => {

@@ -290,7 +290,16 @@ kbd {
   background: none;
   display: grid;
   place-items: center;
+  position: relative;
   transition: border-color .15s, background .15s;
+}
+
+/* 17px is a small target; keep the look, widen the hit area */
+.tick::before {
+  content: "";
+  position: absolute;
+  inset: -9px;
+  border-radius: 50%;
 }
 .tick:hover { border-color: var(--iris); }
 .task.done .tick { background: var(--iris); border-color: var(--iris); }
