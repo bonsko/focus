@@ -205,9 +205,7 @@ def new_project(name: str = Form(), con=Depends(db.get_db), user=Depends(current
 @app.post("/projects/{project_id}/delete")
 def delete_project(project_id: int, con=Depends(db.get_db), user=Depends(current_user)):
     project = owned(con, user, "projects", project_id)
-    total = con.execute(
-        "SELECT count(*) FROM projects WHERE user_id = ?", (user["id"],)
-    ).fetchone()[0]
+    total = con.execute("SELECT count(*) FROM projects WHERE user_id = ?", (user["id"],)).fetchone()[0]
     left = con.execute(
         "SELECT count(*) FROM tasks WHERE project_id = ? AND user_id = ?",
         (project["id"], user["id"]),
@@ -215,8 +213,10 @@ def delete_project(project_id: int, con=Depends(db.get_db), user=Depends(current
     if total <= 1:
         return notice("the last project has to stay — there is nowhere else to put tasks.")
     if left:
-        return notice(f"{left} task{'' if left == 1 else 's'} still in {project['name']} — move "
-                      f"{'it' if left == 1 else 'them'} to another project first.")
+        return notice(
+            f"{left} task{'' if left == 1 else 's'} still in {project['name']} — move "
+            f"{'it' if left == 1 else 'them'} to another project first."
+        )
     with con:
         con.execute("DELETE FROM projects WHERE id = ? AND user_id = ?", (project["id"], user["id"]))
     return Response(status_code=200, headers={"HX-Redirect": "/"})
@@ -224,7 +224,8 @@ def delete_project(project_id: int, con=Depends(db.get_db), user=Depends(current
 
 def notice(message: str) -> Response:
     """200 + a toast event; a 4xx would be treated as an error by htmx and stay silent."""
-    return Response(status_code=200, headers={"HX-Trigger": json.dumps({"focus:notice": {"message": message}})})
+    trigger = json.dumps({"focus:notice": {"message": message}})
+    return Response(status_code=200, headers={"HX-Trigger": trigger})
 
 
 @app.get("/search")
@@ -248,7 +249,8 @@ def new_task(
     if title:
         with con:
             con.execute(
-                "INSERT INTO tasks (user_id, project_id, title, position) VALUES (?, ?, ?, "
+                "INSERT INTO tasks (user_id, project_id, title, position) "
+                "VALUES (?, ?, ?, "
                 "(SELECT coalesce(max(position), 0) + 1 FROM tasks WHERE project_id = ?))",
                 (user["id"], project_id, title, project_id),
             )
@@ -456,7 +458,6 @@ def avatar(name: str, con=Depends(db.get_db), user=Depends(current_user)):
     return FileResponse(path, media_type="image/webp", headers={"Cache-Control": "private, max-age=300"})
 
 
-
 # ---------------------------------------------------------------- ramble
 
 
@@ -474,7 +475,9 @@ def render_ramble(request: Request, con, user, row, tasks=None):
 
 @app.get("/ramble")
 def ramble_page(request: Request, con=Depends(db.get_db), user=Depends(current_user)):
-    return templates.TemplateResponse(request, "ramble.html", {"user": user, "projects": projects_of(con, user)})
+    return templates.TemplateResponse(
+        request, "ramble.html", {"user": user, "projects": projects_of(con, user)}
+    )
 
 
 @app.post("/ramble")
@@ -544,7 +547,8 @@ def accept_ramble(
             else:
                 project_id = pid["id"]
             con.execute(
-                "INSERT INTO tasks (user_id, project_id, title, position) VALUES (?, ?, ?, "
+                "INSERT INTO tasks (user_id, project_id, title, position) "
+                "VALUES (?, ?, ?, "
                 "(SELECT coalesce(max(position), 0) + 1 FROM tasks WHERE project_id = ?))",
                 (user["id"], project_id, clean_title, project_id),
             )
@@ -554,6 +558,7 @@ def accept_ramble(
         "partials/ramble_panel.html",
         {"ramble": {"id": ramble_id, "status": "accepted"}, "tasks": [], "projects": [], "made": made},
     )
+
 
 # ---------------------------------------------------------------- ai
 

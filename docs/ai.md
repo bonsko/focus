@@ -18,9 +18,8 @@ defensive.
 ```python
 def ask(prompt: str) -> str:
     exe = shutil.which("hermes") or "/usr/sbin/hermes"
-    with LOCK:                                   # one agent at a time
-        proc = subprocess.run([exe, "-z", prompt],
-                              capture_output=True, text=True, timeout=TIMEOUT)
+    with LOCK:  # one agent at a time
+        proc = subprocess.run([exe, "-z", prompt], capture_output=True, text=True, timeout=TIMEOUT)
     if proc.returncode != 0:
         raise RuntimeError((proc.stderr or proc.stdout or "hermes failed")[-300:])
     return clean(proc.stdout)

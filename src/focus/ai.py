@@ -99,8 +99,7 @@ def split_prompt(task: sqlite3.Row) -> str:
 
 def research_prompt(task: sqlite3.Row) -> str:
     return (
-        PLAIN
-        + "Research the topic of this task and write a short briefing, at most 200 words, "
+        PLAIN + "Research the topic of this task and write a short briefing, at most 200 words, "
         "with concrete facts and links where you have them. Begin directly with the first "
         "fact: no preamble, no description of what you are about to do, no closing remarks.\n"
         f"Task: {task['title']}\nNotes: {task['notes'] or '(none)'}"
@@ -220,7 +219,9 @@ def run_ramble(ramble_id: int) -> None:
         try:
             tasks = parse_ramble(ask(ramble_prompt(row["text"], projects)))
             if not tasks:
-                raise RuntimeError("hermes sent no tasks back — try again, or split the dump into a few lines")
+                raise RuntimeError(
+                    "hermes sent no tasks back — try again, or split the dump into a few lines"
+                )
             result = json.dumps(tasks)
         except subprocess.TimeoutExpired:
             raise RuntimeError(f"hermes took longer than {TIMEOUT}s") from None
