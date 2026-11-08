@@ -676,6 +676,9 @@ input, select, textarea, button { border-radius: 8px; }
 .phone-back { display: none; }
 
 @media (max-width: 720px) {
+  /* the phone has its own arrow in the main column; the page-level one repeats it */
+  .back { display: none; }
+
   .phone-back {
     display: inline-flex;
     align-items: center;
