@@ -162,7 +162,7 @@ def login(request: Request, username: str = Form(), password: str = Form(), con=
         return templates.TemplateResponse(
             request, "login.html", {"error": "that name is taken — wrong password"}, status_code=401
         )
-    response = goto_project(con, user)
+    response = RedirectResponse("/", status_code=303)
     response.set_cookie(
         auth.COOKIE,
         auth.session_cookie(user["username"]),
@@ -184,8 +184,10 @@ def logout():
 
 
 @app.get("/")
-def home(con=Depends(db.get_db), user=Depends(current_user)):
-    return goto_project(con, user)
+def home(request: Request, con=Depends(db.get_db), user=Depends(current_user)):
+    # the same page serves both shapes: desktop shows the inbox board, a phone
+    # shows the menu (css decides, from the body class)
+    return project_page(request, inbox(con, user), con, user)
 
 
 @app.get("/p/{project_id}")

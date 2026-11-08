@@ -290,3 +290,19 @@ def test_avatar_path_cannot_escape(client):
     assert client.get("/avatars/999.webp").status_code == 404
     assert client.get("/avatars/..%2F..%2Fetc%2Fpasswd.webp").status_code == 404
     assert client.get("/avatars/evil.svg").status_code == 404
+
+
+def test_home_is_the_menu_and_a_project_is_the_board(client):
+    client.post("/login", data={"username": "nat", "password": "a"})
+    home = client.get("/")
+    assert home.status_code == 200  # no redirect: the phone needs a menu at /
+    assert '<body class="home"' in home.text
+    assert 'class="ramble-link"' in home.text
+    assert 'class="phone-back"' in home.text
+
+    con = db.connect()
+    project_id = con.execute("SELECT id FROM projects ORDER BY position").fetchone()["id"]
+    con.close()
+    board = client.get(f"/p/{project_id}")
+    assert board.status_code == 200
+    assert '<body class="board"' in board.text

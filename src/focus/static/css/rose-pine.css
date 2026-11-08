@@ -488,30 +488,40 @@ kbd {
 
 @media (max-width: 720px) {
   .shell { grid-template-columns: minmax(0, 1fr); }
-  .sidebar {
+
+  /* one thing at a time: the menu, or one board, never both */
+  body.home .main { display: none; }
+  body.board .sidebar { display: none; }
+
+  body.home .sidebar {
+    position: static;
+    height: auto;
+    width: auto;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+    padding: 28px 20px 22px;
+    border-right: 0;
+    overflow: visible;
+  }
+  body.home .brand { font-size: 26px; padding: 0; }
+  body.home .projects { overflow: visible; gap: 2px; }
+  body.home .project { padding: 13px 12px; font-size: 15px; border-radius: 10px; }
+  body.home .ramble-link { padding: 13px 12px; font-size: 15px; border-radius: 10px; }
+  body.home .new-project { margin-top: 4px; }
+  body.home .new-project input { padding: 12px; font-size: 15px; }
+  body.home .side-foot { flex-direction: column; align-items: stretch; gap: 10px; }
+  body.home .me { min-height: 54px; padding: 12px; font-size: 15px; }
+  body.home .avatar { width: 38px; height: 38px; }
+
+  body.board .main {
     grid-column: 1;
     grid-row: 1;
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background: var(--base);
-    height: auto;
-    flex-direction: row;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 14px 16px;
-    border-right: 0;
-    border-bottom: 1px solid var(--hl-low);
+    max-width: none;
+    padding: 16px 16px 90px;
   }
-  .brand { padding: 0; }
-  .projects { flex-direction: row; flex-wrap: wrap; align-items: center; }
-  .new-project { width: 100px; }
-  .side-foot { margin: 0 0 0 auto; flex-direction: row; align-items: center; }
-  .theme-form button span { display: none; }
-  .main { grid-column: 1; grid-row: 2; padding: 28px 18px 80px; }
   .hints { display: none; }
-  .sheet { border-left: 0; }
 }
 
 /* ---------- ramble ---------- */
@@ -620,14 +630,18 @@ input, select, textarea, button { border-radius: 8px; }
 
 /* ramble sits above the projects and states itself */
 .ramble-link {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   margin: 0 0 6px;
-  padding: 6px 8px;
+  padding: 7px 8px;
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
   border-radius: 8px;
 }
+.ramble-spark { font-size: 11px; line-height: 1; }
 .ramble-link:hover { background: var(--hl-low); text-decoration: none; }
 
 /* the picked project keeps its delete button visible; it never hugs the edge */
@@ -655,4 +669,32 @@ input, select, textarea, button { border-radius: 8px; }
   height: 22px;
   padding: 0;
   font-size: 15px;
+}
+
+/* ---------- phone: full-screen sheets, one back button ---------- */
+
+.phone-back { display: none; }
+
+@media (max-width: 720px) {
+  .phone-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    margin-bottom: 12px;
+    border: 1px solid var(--hl-low);
+    border-radius: 10px;
+    color: var(--subtle);
+    font-size: 17px;
+  }
+  .phone-back:hover { background: var(--hl-low); text-decoration: none; }
+
+  .sheet {
+    width: 100vw;
+    max-width: 100vw;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
 }

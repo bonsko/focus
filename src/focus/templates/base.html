@@ -7,18 +7,18 @@
   <meta name="color-scheme" content="dark light">
   <title>{% block title %}focus{% endblock %}</title>
   <style>{{ theme_css(user) }}</style>
-  <link rel="stylesheet" href="/static/css/rose-pine.css?v=20261109c">
+  <link rel="stylesheet" href="/static/css/rose-pine.css?v=20261109d">
   <script src="/static/vendor/htmx.min.js" defer></script>
-  <script src="/static/js/confetti.js?v=20261109c" defer></script>
-  <script src="/static/js/app.js?v=20261109c" defer></script>
+  <script src="/static/js/confetti.js?v=20261109d" defer></script>
+  <script src="/static/js/app.js?v=20261109d" defer></script>
 </head>
-<body>
+<body class="{% if request.url.path == '/' %}home{% else %}board{% endif %}">
 <div class="shell">
   <aside class="sidebar">
     <a class="brand" href="/"><span class="brand-flower" aria-hidden="true">🌸</span> focus</a>
 
     <nav class="projects" aria-label="projects">
-      <a class="ramble-link" href="/ramble">ramble ✦</a>
+      <a class="ramble-link" href="/ramble"><span class="ramble-spark" aria-hidden="true">✨</span> ramble</a>
       {% for p in projects %}
       <div class="project-row">
         <a class="project{% if project and p['id'] == project['id'] %} active{% endif %}" href="/p/{{ p['id'] }}">{{ p['name'] }}</a>
@@ -45,6 +45,7 @@
   </aside>
 
   <main class="main">
+    <a class="phone-back" href="/" aria-label="back to the menu">←</a>
     {% block main %}{% endblock %}
   </main>
 </div>
