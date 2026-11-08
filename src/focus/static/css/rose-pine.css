@@ -204,6 +204,8 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
 
 .page-head {
   display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
@@ -802,3 +804,5 @@ input, select, textarea, button { border-radius: 8px; }
 }
 
 .hints kbd { color: var(--subtle); }
+
+.hints { flex-wrap: wrap; min-width: 0; }
