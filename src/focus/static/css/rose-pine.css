@@ -94,7 +94,7 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
 
 .brand {
   color: var(--rose);
-  font-size: 15px;
+  font-size: 19px;
   font-weight: 600;
   letter-spacing: .12em;
   padding: 0 8px;
@@ -662,8 +662,10 @@ input, select, textarea, button { border-radius: 8px; }
 /* the picked project keeps its delete button visible; it never hugs the edge */
 .project-row { padding-right: 4px; }
 .project-row .tiny { border: 0; background: none; margin-right: 2px; }
-.project-row:hover .tiny,
-.project-row .tiny:focus-visible,
-.project-row:has(.project.active) .tiny { opacity: 1; }
+.project-row:has(.project.active) { background: var(--hl-low); }
+.project-row:has(.project.active) .project { background: transparent; }
 
-.brand-flower { font-size: 13px; opacity: .9; }
+.brand-flower { font-size: 16px; margin-right: 2px; }
+
+/* the ramble entry is a button-shaped thing, so give it an edge */
+.ramble-link { border: 1px solid var(--hl-low); }
