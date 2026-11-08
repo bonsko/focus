@@ -232,6 +232,6 @@ def test_theme_rejects_a_scheme_of_the_wrong_variant(client):
 
 def test_scale_cookie_is_clamped(client):
     client.cookies.set("focus_scale", "1.25")
-    assert "zoom:1.25" in client.get("/login").text
+    assert "zoom:1.25;" in client.get("/login").text
     client.cookies.set("focus_scale", "9")
-    assert 'zoom:1"' in client.get("/login").text
+    assert "zoom:1;" in client.get("/login").text
