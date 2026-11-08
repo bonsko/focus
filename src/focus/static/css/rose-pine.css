@@ -781,3 +781,9 @@ body.home .side-search input { padding: 12px; font-size: 15px; border-radius: 10
   .sheet-title { font-size: 17px; }
   .sheet textarea { min-height: 32vh; }
 }
+
+/* a phone does not need the desktop scale cookie: zoom rescales the css
+   viewport, which is what pushed fixed panels and the sheet off-screen */
+@media (max-width: 720px) {
+  html { zoom: 1 !important; }
+}
