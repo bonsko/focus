@@ -1,0 +1,42 @@
+{% if ramble and ramble['status'] == 'running' %}
+<div id="ramble-panel" class="ai-thinking" hx-get="/ramble/{{ ramble['id'] }}"
+     hx-trigger="load delay:2s" hx-swap="outerHTML" role="status">
+  <span class="pulse"></span>
+  sorting it out…
+  <small>hermes is reading your dump. a minute, maybe two.</small>
+</div>
+{% elif ramble and ramble['status'] == 'error' %}
+<div id="ramble-panel" class="ai-error" role="alert">
+  <p>{{ ramble['error'] }}</p>
+  <form hx-post="/ramble" hx-target="#ramble-panel" hx-swap="innerHTML">
+    <input type="hidden" name="text" value="{{ ramble['text'] }}">
+    <button class="quiet" type="submit">try again</button>
+  </form>
+</div>
+{% elif ramble and ramble['status'] == 'done' %}
+<form class="ramble-row-form" hx-post="/ramble/{{ ramble['id'] }}/accept"
+      hx-target="#ramble-panel" hx-swap="innerHTML">
+  <datalist id="ramble-projects">
+    {% for p in projects %}<option value="{{ p['name'] }}"></option>{% endfor %}
+  </datalist>
+  {% for t in tasks %}
+  <div class="ramble-row">
+    <input class="ramble-title" name="title" value="{{ t['title'] }}" maxlength="500"
+           aria-label="task {{ loop.index }}">
+    <input class="ramble-project" name="project" value="{{ t['project'] }}" maxlength="40"
+           list="ramble-projects" aria-label="project {{ loop.index }}">
+  </div>
+  {% endfor %}
+  <div class="ramble-actions">
+    <button class="quiet" type="submit">add {{ tasks|length }} task{{ '' if tasks|length == 1 else 's' }}</button>
+    <span class="hint">edit anything, clear a title to drop it, or rewrite the project</span>
+  </div>
+</form>
+{% elif ramble and ramble['status'] == 'accepted' %}
+<div id="ramble-panel" class="ai-done">
+  {{ made }} task{{ '' if made == 1 else 's' }} added.
+  <a href="/">go to the list</a>
+</div>
+{% else %}
+<div id="ramble-panel" class="empty">nothing yet.</div>
+{% endif %}

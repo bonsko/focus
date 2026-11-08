@@ -84,6 +84,21 @@ under `---`.
 the agent is told to research, not to summarise — it has tools, and letting it
 use them is the point of going through hermes at all.
 
+## ramble → tasks
+
+`ramble_prompt()` is the third prompt. it is given the dump plus the user's
+existing project names, and must answer with
+
+```json
+{"tasks": [{"title": "short imperative", "project": "short name"}]}
+```
+
+titles only — no notes, no subtasks, at most 15 — and an existing project when
+one fits, otherwise a new short lowercase name. `parse_ramble()` accepts the
+object, a bare array, or a list of strings, and clamps title/project length.
+nothing is written at this stage: the rows are rendered as editable inputs and
+`POST /ramble/{id}/accept` creates projects and tasks from what comes back.
+
 ## jobs
 
 ai calls never run inside a request. `POST /tasks/{id}/ai/{kind}` inserts a row:

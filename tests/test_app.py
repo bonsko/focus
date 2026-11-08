@@ -154,3 +154,50 @@ def test_ai_output_cleanup_and_parsing():
     assert ai.briefing("sure! here it is:\n\n# nixpkgs\nfacts") == "# nixpkgs\nfacts"
     assert ai.briefing("no heading, just words") == "no heading, just words"
     assert ai.steps("[1, 2]") == ["1", "2"]
+
+
+def test_parse_ramble_accepts_shapes():
+    assert ai.parse_ramble('{"tasks":[{"title":"Email the lawyer","project":"Personal"}]}') == [
+        {"title": "Email the lawyer", "project": "personal"}
+    ]
+    # bare array of strings, wrapped in prose and fences
+    assert ai.parse_ramble('sure:\n```json\n["buy milk", "call mum"]\n```') == [
+        {"title": "buy milk", "project": "inbox"},
+        {"title": "call mum", "project": "inbox"},
+    ]
+    assert ai.parse_ramble("no json here at all") == []
+
+
+def test_ramble_accept_creates_tasks_in_edited_projects(client):
+    client.post("/login", data={"username": "nat", "password": "a"})
+    con = db.connect()
+    user_id = con.execute("SELECT id FROM users WHERE username = 'nat'").fetchone()["id"]
+    rid = con.execute(
+        "INSERT INTO rambles (user_id, text, status, result) VALUES (?, 'x', 'done', ?)",
+        (user_id, '[{"title":"a","project":"inbox"}]'),
+    ).lastrowid
+    con.commit()
+    con.close()
+
+    res = client.post(
+        f"/ramble/{rid}/accept",
+        data={"title": ["email the lawyer", "", "renew the domain"], "project": ["papers", "ignored", "web"]},
+    )
+    assert res.status_code == 200
+    assert "2 tasks added" in res.text
+
+    con = db.connect()
+    rows = con.execute(
+        "SELECT t.title, p.name FROM tasks t JOIN projects p ON p.id = t.project_id "
+        "WHERE t.user_id = ? ORDER BY t.id",
+        (user_id,),
+    ).fetchall()
+    # blank titles are dropped, projects come from the edited form
+    assert [(r["title"], r["name"]) for r in rows] == [
+        ("email the lawyer", "papers"),
+        ("renew the domain", "web"),
+    ]
+    # no notes, no subtasks generated
+    assert con.execute("SELECT count(*) FROM subtasks").fetchone()[0] == 0
+    assert con.execute("SELECT count(*) FROM tasks WHERE notes != ''").fetchone()[0] == 0
+    con.close()

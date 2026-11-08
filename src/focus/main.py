@@ -456,6 +456,105 @@ def avatar(name: str, con=Depends(db.get_db), user=Depends(current_user)):
     return FileResponse(path, media_type="image/webp", headers={"Cache-Control": "private, max-age=300"})
 
 
+
+# ---------------------------------------------------------------- ramble
+
+
+def render_ramble(request: Request, con, user, row, tasks=None):
+    return templates.TemplateResponse(
+        request,
+        "partials/ramble_panel.html",
+        {
+            "ramble": row,
+            "tasks": tasks or [],
+            "projects": projects_of(con, user),
+        },
+    )
+
+
+@app.get("/ramble")
+def ramble_page(request: Request, con=Depends(db.get_db), user=Depends(current_user)):
+    return templates.TemplateResponse(request, "ramble.html", {"user": user, "projects": projects_of(con, user)})
+
+
+@app.post("/ramble")
+def start_ramble(
+    request: Request,
+    background: BackgroundTasks,
+    text: str = Form(),
+    con=Depends(db.get_db),
+    user=Depends(current_user),
+):
+    text = text.strip()
+    if not text:
+        return templates.TemplateResponse(
+            request, "partials/ramble_panel.html", {"ramble": None, "tasks": [], "projects": []}
+        )
+    with con:
+        cur = con.execute("INSERT INTO rambles (user_id, text) VALUES (?, ?)", (user["id"], text))
+        ramble_id = cur.lastrowid
+    background.add_task(ai.run_ramble, ramble_id)
+    return render_ramble(request, con, user, {"id": ramble_id, "status": "running", "text": text})
+
+
+@app.get("/ramble/{ramble_id}")
+def poll_ramble(request: Request, ramble_id: int, con=Depends(db.get_db), user=Depends(current_user)):
+    row = con.execute(
+        "SELECT * FROM rambles WHERE id = ? AND user_id = ?", (ramble_id, user["id"])
+    ).fetchone()
+    if row is None:
+        raise HTTPException(404)
+    tasks = json.loads(row["result"]) if row["status"] == "done" and row["result"] else []
+    return render_ramble(request, con, user, row, tasks)
+
+
+@app.post("/ramble/{ramble_id}/accept")
+def accept_ramble(
+    request: Request,
+    ramble_id: int,
+    title: list[str] | None = Form(None),
+    project: list[str] | None = Form(None),
+    con=Depends(db.get_db),
+    user=Depends(current_user),
+):
+    row = con.execute(
+        "SELECT * FROM rambles WHERE id = ? AND user_id = ?", (ramble_id, user["id"])
+    ).fetchone()
+    if row is None:
+        raise HTTPException(404)
+    titles = title or []
+    names = project or []
+    made = 0
+    with con:
+        for i, raw in enumerate(titles):
+            clean_title = " ".join((raw or "").split())[:500]
+            if not clean_title:
+                continue
+            name = (" ".join((names[i] if i < len(names) else "inbox").split())[:40] or "inbox").lower()
+            pid = con.execute(
+                "SELECT id FROM projects WHERE user_id = ? AND name = ?", (user["id"], name)
+            ).fetchone()
+            if pid is None:
+                cur = con.execute(
+                    "INSERT INTO projects (user_id, name, position) VALUES (?, ?, "
+                    "(SELECT coalesce(max(position), 0) + 1 FROM projects WHERE user_id = ?))",
+                    (user["id"], name, user["id"]),
+                )
+                project_id = cur.lastrowid
+            else:
+                project_id = pid["id"]
+            con.execute(
+                "INSERT INTO tasks (user_id, project_id, title, position) VALUES (?, ?, ?, "
+                "(SELECT coalesce(max(position), 0) + 1 FROM tasks WHERE project_id = ?))",
+                (user["id"], project_id, clean_title, project_id),
+            )
+            made += 1
+    return templates.TemplateResponse(
+        request,
+        "partials/ramble_panel.html",
+        {"ramble": {"id": ramble_id, "status": "accepted"}, "tasks": [], "projects": [], "made": made},
+    )
+
 # ---------------------------------------------------------------- ai
 
 

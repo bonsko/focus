@@ -35,6 +35,7 @@ projects  id, user_id, name, position            unique(user_id, name)
 tasks     id, user_id, project_id, title, notes, status, position, timestamps
 subtasks  id, task_id, title, done, position
 jobs      id, user_id, task_id, kind, status, result, error, created_at
+rambles   id, user_id, text, status, result, error, created_at
 ```
 
 - everything hangs off `user_id`, and every query filters by it. a row belonging
@@ -67,6 +68,10 @@ jobs      id, user_id, task_id, kind, status, result, error, created_at
 | `POST` | `/subtasks/{id}/toggle` | tick a step |
 | `GET`/`POST` | `/settings`, `/settings/theme`, `/settings/avatar` | the three settings |
 | `GET` | `/avatars/{name}` | avatar bytes, session required |
+| `GET` | `/ramble` | paste-a-brain-dump page |
+| `POST` | `/ramble` | start turning a dump into tasks |
+| `GET` | `/ramble/{id}` | poll that conversion |
+| `POST` | `/ramble/{id}/accept` | create the edited task list |
 | `POST` | `/tasks/{id}/ai/{split,research}` | start a job |
 | `GET` | `/tasks/{id}/ai?job=` | poll a job |
 
@@ -123,6 +128,10 @@ POST /tasks/{id}/ai/split ──▶ insert job(running) ──▶ return panel
                                         ▲
 panel: hx-get .../ai?job=N, hx-trigger="load delay:2s"  ──┘
 ```
+
+ramble conversions use the same shape — a `rambles` row instead of a `jobs` row,
+because a dump belongs to no task — and the same polling panel; the accept step is
+plain sql, so what lands is exactly what the user edited.
 
 `ai.py` keeps one global lock, so two users pressing the button queue up
 instead of starting two agents on a two-core box. a job older than 330 s is

@@ -157,3 +157,79 @@ def run_job(job_id: int) -> None:
             con.execute("UPDATE jobs SET status = 'error', error = ? WHERE id = ?", (str(exc)[:300], job_id))
     finally:
         con.close()
+
+
+RAMBLE_PROMPT = """\
+You turn a person's brain dump into a task list. Each distinct intention becomes
+one task, phrased as a short imperative they could act on ("email the lawyer",
+"check what still pulls python < 3.14"). Keep their own wording when it is already
+clear, and keep it lowercase if they wrote it that way. Do not invent work they did
+not ask for. Never merge two unrelated intentions into one task.
+
+Return JSON only, no prose and no code fences:
+{"tasks": [{"title": "short imperative", "project": "short project name"}]}
+
+At most 15 tasks. "project" should be one of the existing projects below when one
+fits, otherwise a short lowercase name (one or two words). Never write notes,
+descriptions or subtasks — title and project only.
+
+Existing projects: %s
+
+Brain dump:
+%s"""
+
+
+def ramble_prompt(text: str, projects: list[str]) -> str:
+    return RAMBLE_PROMPT % (", ".join(projects) or "(none yet)", text.strip())
+
+
+def parse_ramble(text: str) -> list[dict]:
+    """Tolerant: accepts {"tasks": [...]}, a bare [...], or strings in the list."""
+    data = first_json(text)
+    if isinstance(data, dict):
+        data = next((v for v in data.values() if isinstance(v, list)), None)
+    out: list[dict] = []
+    for item in data or []:
+        if isinstance(item, str):
+            title, project = item, "inbox"
+        elif isinstance(item, dict):
+            title = str(item.get("title") or item.get("task") or "").strip()
+            project = str(item.get("project") or "inbox").strip()
+        else:
+            continue
+        title = " ".join(title.split())[:500]
+        project = " ".join(project.split())[:40].lower() or "inbox"
+        if title:
+            out.append({"title": title, "project": project})
+        if len(out) == 15:
+            break
+    return out
+
+
+def run_ramble(ramble_id: int) -> None:
+    """Runs in a background thread after the request returns."""
+    con = db.connect()
+    try:
+        row = con.execute("SELECT * FROM rambles WHERE id = ?", (ramble_id,)).fetchone()
+        projects = [
+            p["name"]
+            for p in con.execute(
+                "SELECT name FROM projects WHERE user_id = ? ORDER BY position, id", (row["user_id"],)
+            )
+        ]
+        try:
+            tasks = parse_ramble(ask(ramble_prompt(row["text"], projects)))
+            if not tasks:
+                raise RuntimeError("hermes sent no tasks back — try again, or split the dump into a few lines")
+            result = json.dumps(tasks)
+        except subprocess.TimeoutExpired:
+            raise RuntimeError(f"hermes took longer than {TIMEOUT}s") from None
+        with con:
+            con.execute("UPDATE rambles SET status = 'done', result = ? WHERE id = ?", (result, ramble_id))
+    except Exception as exc:  # noqa: BLE001 - the message is what the user sees
+        with con:
+            con.execute(
+                "UPDATE rambles SET status = 'error', error = ? WHERE id = ?", (str(exc)[:300], ramble_id)
+            )
+    finally:
+        con.close()

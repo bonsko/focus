@@ -50,6 +50,16 @@ CREATE TABLE IF NOT EXISTS jobs (
   error TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
+CREATE TABLE IF NOT EXISTS rambles (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  text TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'running',
+  result TEXT,
+  error TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS rambles_by_user ON rambles (user_id, id);
 CREATE INDEX IF NOT EXISTS tasks_by_project ON tasks (user_id, project_id, status, position);
 CREATE INDEX IF NOT EXISTS subtasks_by_task ON subtasks (task_id, position);
 """

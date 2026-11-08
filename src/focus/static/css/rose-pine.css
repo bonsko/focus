@@ -143,6 +143,14 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
 
 .projects { display: flex; flex-direction: column; gap: 1px; }
 
+.ramble-link {
+  display: block;
+  margin: 6px 8px 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.ramble-link:hover { color: var(--iris); text-decoration: none; }
+
 .project-row { display: flex; align-items: center; gap: 2px; }
 .project-row .project { flex: 1; min-width: 0; }
 .project-row .tiny {
@@ -569,6 +577,21 @@ kbd {
   .main { grid-column: 1; grid-row: 2; padding: 28px 18px 80px; }
   .hints { display: none; }
   .sheet { border-left: 0; }
+}
+
+/* ---------- ramble ---------- */
+
+.ramble-form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+.ramble-form textarea { min-height: 170px; font-size: 13.5px; line-height: 1.6; resize: vertical; }
+.ramble-row-form { display: flex; flex-direction: column; gap: 6px; }
+.ramble-row { display: grid; grid-template-columns: minmax(0, 1fr) 150px; gap: 8px; }
+.ramble-row input { font-size: 13.5px; }
+.ramble-project { color: var(--subtle); }
+.ramble-actions { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+.ramble-actions .hint { color: var(--muted); font-size: 12px; }
+
+@media (max-width: 720px) {
+  .ramble-row { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

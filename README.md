@@ -94,6 +94,10 @@ configuring.
   and shows them as editable rows (checkbox + text) before saving.
 - **research this** — runs a real agent turn with web tools and appends a
   plain-text briefing to the task's notes, preamble stripped.
+- **ramble** (`/ramble`) — paste a brain dump and get a proposed task list back:
+  one task per intention, a suggested project for each, nothing else. titles and
+  project names are editable, a cleared title drops the row, and nothing is
+  saved until you press add. it never writes notes or subtasks.
 
 hermes is slow (20 s – 3 min), so both actions are background jobs: the request
 returns at once, the panel polls every 2 s, and a failure ends as a visible
