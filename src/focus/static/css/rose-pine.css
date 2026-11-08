@@ -601,3 +601,33 @@ input, select, textarea, button { border-radius: 8px; }
   .main { padding: 20px 18px 90px; }
   .sheet { border-radius: 16px 16px 0 0; border-left: 0; border-top: 1px solid var(--hl-med); }
 }
+
+/* ---------- zoom-aware layout ---------- */
+/* zoom scales 100dvh too, so the shell divides the factor back out */
+
+.sidebar { height: calc(100dvh / var(--z, 1)); }
+.sheet { height: calc(100dvh / var(--z, 1)); }
+.login-page { min-height: calc(100dvh / var(--z, 1)); }
+
+/* the project list takes the slack and scrolls; the profile never leaves the screen */
+.projects { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.side-foot { gap: 8px; }
+
+/* settings cards fill the column, so their edges line up with the header rule */
+.settings-form { max-width: 100%; }
+
+/* profile chip: bigger, and its contents actually centred */
+.me {
+  min-height: 48px;
+  padding: 10px 12px;
+  gap: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+.avatar { width: 32px; height: 32px; }
+.avatar.initial { font-size: 13px; }
+
+@media (max-height: 620px) {
+  .sidebar { gap: 16px; padding-top: 18px; }
+  .me { min-height: 40px; }
+}

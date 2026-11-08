@@ -1,15 +1,15 @@
 <!doctype html>
-<html lang="en" style="zoom:{{ scale(request) }}">
+<html lang="en" style="zoom:{{ scale(request) }};--z:{{ scale(request) }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <title>{% block title %}focus{% endblock %}</title>
   <style>{{ theme_css(user) }}</style>
-  <link rel="stylesheet" href="/static/css/rose-pine.css?v=20261108b">
+  <link rel="stylesheet" href="/static/css/rose-pine.css?v=20261108c">
   <script src="/static/vendor/htmx.min.js" defer></script>
-  <script src="/static/js/confetti.js?v=20261108b" defer></script>
-  <script src="/static/js/app.js?v=20261108b" defer></script>
+  <script src="/static/js/confetti.js?v=20261108c" defer></script>
+  <script src="/static/js/app.js?v=20261108c" defer></script>
 </head>
 <body>
 <div class="shell">
