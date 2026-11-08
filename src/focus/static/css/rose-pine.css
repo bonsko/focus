@@ -658,3 +658,12 @@ input, select, textarea, button { border-radius: 8px; }
   border-radius: 8px;
 }
 .ramble-link:hover { background: var(--hl-low); text-decoration: none; }
+
+/* the picked project keeps its delete button visible; it never hugs the edge */
+.project-row { padding-right: 4px; }
+.project-row .tiny { border: 0; background: none; margin-right: 2px; }
+.project-row:hover .tiny,
+.project-row .tiny:focus-visible,
+.project-row:has(.project.active) .tiny { opacity: 1; }
+
+.brand-flower { font-size: 13px; opacity: .9; }
