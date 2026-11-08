@@ -1,14 +1,15 @@
 <!doctype html>
-<html lang="en" data-theme="{{ user['theme'] if user else 'auto' }}">
+<html lang="en" style="zoom:{{ scale(request) }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <title>{% block title %}focus{% endblock %}</title>
-  <link rel="stylesheet" href="/static/css/rose-pine.css?v=20261108a">
+  <style>{{ theme_css(user) }}</style>
+  <link rel="stylesheet" href="/static/css/rose-pine.css?v=20261108b">
   <script src="/static/vendor/htmx.min.js" defer></script>
-  <script src="/static/js/confetti.js?v=20261108a" defer></script>
-  <script src="/static/js/app.js?v=20261108a" defer></script>
+  <script src="/static/js/confetti.js?v=20261108b" defer></script>
+  <script src="/static/js/app.js?v=20261108b" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -31,15 +32,6 @@
     </nav>
 
     <div class="side-foot">
-      <form method="post" action="/settings/theme" class="theme-form">
-        <input type="hidden" name="back" value="{{ request.url.path }}">
-        {% set order = {'auto': 'light', 'light': 'dark', 'dark': 'auto'} %}
-        <input type="hidden" name="theme" value="{{ order[user['theme']] if user else 'auto' }}">
-        <button class="quiet theme-toggle" title="theme: {{ user['theme'] if user else 'auto' }}">
-          {{ {'auto': '◐', 'light': '☀', 'dark': '☾'}[user['theme']] if user else '◐' }}
-          <span>{{ user['theme'] if user else 'auto' }}</span>
-        </button>
-      </form>
       <a class="me" href="/settings">
         {% if user and user['avatar'] %}
         <img class="avatar" src="/avatars/{{ user['avatar'] }}" alt="" width="22" height="22">

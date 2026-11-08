@@ -1,4 +1,4 @@
-/* rosé pine moon (default) and dawn. values from rosepinetheme.com/palette */
+/* palette is server-rendered from base16 (see focus/themes.py); these are fallbacks */
 :root {
   --base: #232136;
   --surface: #2a273f;
@@ -12,50 +12,10 @@
   --pine: #3e8fb0;
   --foam: #9ccfd8;
   --iris: #c4a7e7;
-  --hl-low: #2a283e;
-  --hl-med: #44415a;
-  --hl-high: #56526e;
+  --hl-low: #393552;
+  --hl-med: #56526e;
+  --hl-high: #6e6a86;
   color-scheme: dark;
-}
-
-[data-theme="light"] {
-  --base: #faf4ed;
-  --surface: #fffaf3;
-  --overlay: #f2e9e1;
-  --muted: #9893a5;
-  --subtle: #797593;
-  --text: #575279;
-  --love: #b4637a;
-  --gold: #ea9d34;
-  --rose: #d7827e;
-  --pine: #286983;
-  --foam: #56949f;
-  --iris: #907aa9;
-  --hl-low: #f4ede8;
-  --hl-med: #dfdad9;
-  --hl-high: #cecacd;
-  color-scheme: light;
-}
-
-@media (prefers-color-scheme: light) {
-  [data-theme="auto"] {
-    --base: #faf4ed;
-    --surface: #fffaf3;
-    --overlay: #f2e9e1;
-    --muted: #9893a5;
-    --subtle: #797593;
-    --text: #575279;
-    --love: #b4637a;
-    --gold: #ea9d34;
-    --rose: #d7827e;
-    --pine: #286983;
-    --foam: #56949f;
-    --iris: #907aa9;
-    --hl-low: #f4ede8;
-    --hl-med: #dfdad9;
-    --hl-high: #cecacd;
-    color-scheme: light;
-  }
 }
 
 * { box-sizing: border-box; }
@@ -597,4 +557,47 @@ kbd {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .subtask.shimmer { background-image: none; }
+}
+
+/* ---------- structure: cards, separators, radii ---------- */
+
+.main { padding: 30px 34px 90px; }
+
+.page-head { border-bottom: 1px solid var(--hl-low); padding-bottom: 14px; }
+
+.tasks {
+  background: var(--surface);
+  border: 1px solid var(--hl-low);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.task + .task { border-top: 1px solid var(--hl-low); }
+.task:hover { background: var(--overlay); }
+.task.done .title { color: var(--muted); }
+
+.sidebar { border-right: 1px solid var(--hl-low); }
+.project { border-radius: 8px; }
+.me { border-top: 1px solid var(--hl-low); padding-top: 10px; }
+
+.sheet {
+  border-left: 1px solid var(--hl-med);
+  border-radius: 16px 0 0 16px;
+  box-shadow: -8px 0 30px rgb(0 0 0 / 0.18);
+}
+
+input, select, textarea, button { border-radius: 8px; }
+.quiet { border: 1px solid var(--hl-med); }
+
+.settings-form {
+  background: var(--surface);
+  border: 1px solid var(--hl-low);
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+.settings-form + .settings-form { margin-top: 14px; }
+
+@media (max-width: 720px) {
+  .main { padding: 20px 18px 90px; }
+  .sheet { border-radius: 16px 16px 0 0; border-left: 0; border-top: 1px solid var(--hl-med); }
 }

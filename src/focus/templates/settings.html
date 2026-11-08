@@ -14,14 +14,35 @@
     <input name="display_name" value="{{ user['display_name'] }}" maxlength="40" autocomplete="nickname">
   </label>
   <label>
-    <span>theme</span>
-    <select name="theme">
-      <option value="auto"{% if user['theme'] == 'auto' %} selected{% endif %}>auto — follow the system</option>
-      <option value="light"{% if user['theme'] == 'light' %} selected{% endif %}>dawn — light</option>
-      <option value="dark"{% if user['theme'] == 'dark' %} selected{% endif %}>moon — dark</option>
+    <span>light theme</span>
+    <select name="theme_light">
+      {% for slug, name in light_themes %}
+      <option value="{{ slug }}"{% if user['theme_light'] == slug %} selected{% endif %}>{{ name }}</option>
+      {% endfor %}
     </select>
   </label>
+  <label>
+    <span>dark theme</span>
+    <select name="theme_dark">
+      {% for slug, name in dark_themes %}
+      <option value="{{ slug }}"{% if user['theme_dark'] == slug %} selected{% endif %}>{{ name }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <small class="hint">your system picks between them — light os, light theme. {{ light_themes|length }} light and {{ dark_themes|length }} dark base16 schemes, nothing else to toggle.</small>
   <button class="quiet">save</button>
+</form>
+
+<form class="settings-form">
+  <label>
+    <span>scale <small class="hint">this device only</small></span>
+    <select id="scale-pick" aria-label="interface scale">
+      {% for s in scales %}
+      <option value="{{ s }}"{% if scale(request) == s %} selected{% endif %}>{{ (s|float * 100)|round|int }}%</option>
+      {% endfor %}
+    </select>
+  </label>
+  <small class="hint">stored in a cookie, so your laptop and your phone can differ.</small>
 </form>
 
 <form class="settings-form" method="post" action="/settings/avatar" enctype="multipart/form-data">

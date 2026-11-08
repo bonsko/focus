@@ -36,6 +36,7 @@ tasks     id, user_id, project_id, title, notes, status, position, timestamps
 subtasks  id, task_id, title, done, position
 jobs      id, user_id, task_id, kind, status, result, error, created_at
 rambles   id, user_id, text, status, result, error, created_at
+users     … theme_light, theme_dark (base16 slugs; users.theme is retired)
 ```
 
 - everything hangs off `user_id`, and every query filters by it. a row belonging
@@ -132,6 +133,12 @@ panel: hx-get .../ai?job=N, hx-trigger="load delay:2s"  ──┘
 ramble conversions use the same shape — a `rambles` row instead of a `jobs` row,
 because a dump belongs to no task — and the same polling panel; the accept step is
 plain sql, so what lands is exactly what the user edited.
+
+**theming**: `themes.py` holds 361 base16 schemes (tinted-theming, spec 0.11)
+with a `css()` helper that renders `:root` for the light slug and a
+`prefers-color-scheme: dark` override for the dark one. there is no theme
+toggle and no `data-theme`: the OS decides which of the two applies. the scale
+factor is a cookie (`focus_scale`), not a column — two devices, two scales.
 
 `ai.py` keeps one global lock, so two users pressing the button queue up
 instead of starting two agents on a two-core box. a job older than 330 s is

@@ -1,5 +1,6 @@
 """sqlite access. One connection per request, plain SQL, no ORM."""
 
+import contextlib
 import sqlite3
 
 from . import config
@@ -76,6 +77,13 @@ def connect() -> sqlite3.Connection:
 def init() -> None:
     with connect() as con:
         con.executescript(SCHEMA)
+        # users.theme ("auto"/"light"/"dark") is retired; palettes are per variant now.
+        for column, default in (
+            ("theme_light", "rose-pine-dawn"),
+            ("theme_dark", "rose-pine-moon"),
+        ):
+            with contextlib.suppress(sqlite3.OperationalError):
+                con.execute(f"ALTER TABLE users ADD COLUMN {column} TEXT NOT NULL DEFAULT '{default}'")
 
 
 def get_db():

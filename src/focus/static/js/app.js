@@ -160,3 +160,12 @@ document.addEventListener('keydown', (event) => {
     }
   }
 });
+
+// per-device scale: cookie + immediate zoom, no round trip
+const scalePick = document.getElementById("scale-pick");
+if (scalePick) {
+  scalePick.addEventListener("change", () => {
+    document.cookie = `focus_scale=${scalePick.value}; path=/; max-age=31536000; samesite=lax`;
+    document.documentElement.style.zoom = scalePick.value;
+  });
+}

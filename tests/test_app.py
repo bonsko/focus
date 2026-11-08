@@ -201,3 +201,37 @@ def test_ramble_accept_creates_tasks_in_edited_projects(client):
     assert con.execute("SELECT count(*) FROM subtasks").fetchone()[0] == 0
     assert con.execute("SELECT count(*) FROM tasks WHERE notes != ''").fetchone()[0] == 0
     con.close()
+
+
+def test_theme_is_per_user_and_rendered(client):
+    client.post("/login", data={"username": "nat", "password": "a"})
+    out = client.post(
+        "/settings",
+        data={"display_name": "nat", "theme_light": "catppuccin-latte", "theme_dark": "gruvbox-dark-hard"},
+    )
+    assert out.status_code == 200
+    con = db.connect()
+    row = con.execute("SELECT theme_light, theme_dark FROM users WHERE username = 'nat'").fetchone()
+    con.close()
+    assert (row["theme_light"], row["theme_dark"]) == ("catppuccin-latte", "gruvbox-dark-hard")
+
+    page = client.get("/").text
+    assert "--base:#eff1f5" in page  # catppuccin latte background
+    assert "@media (prefers-color-scheme:dark)" in page
+    assert "--base:#1d2021" in page  # gruvbox dark hard background
+
+
+def test_theme_rejects_a_scheme_of_the_wrong_variant(client):
+    client.post("/login", data={"username": "nat", "password": "a"})
+    client.post("/settings", data={"theme_light": "gruvbox-dark-hard", "theme_dark": "catppuccin-latte"})
+    con = db.connect()
+    row = con.execute("SELECT theme_light, theme_dark FROM users WHERE username = 'nat'").fetchone()
+    con.close()
+    assert (row["theme_light"], row["theme_dark"]) == ("rose-pine-dawn", "rose-pine-moon")
+
+
+def test_scale_cookie_is_clamped(client):
+    client.cookies.set("focus_scale", "1.25")
+    assert "zoom:1.25" in client.get("/login").text
+    client.cookies.set("focus_scale", "9")
+    assert 'zoom:1"' in client.get("/login").text

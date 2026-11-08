@@ -20,10 +20,29 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-from . import ai, api, auth, config, db
+from . import ai, api, auth, config, db, themes
 
 HERE = Path(__file__).parent
 templates = Jinja2Templates(directory=HERE / "templates")
+
+SCALES = ("1", "1.1", "1.25", "1.5")
+
+
+def scale_of(request: Request) -> str:
+    """Per-device UI scale lives in a cookie, not the db."""
+    value = request.cookies.get("focus_scale", "1")
+    return value if value in SCALES else "1"
+
+
+def theme_css(user) -> str:
+    return themes.css(
+        user["theme_light"] if user else None,
+        user["theme_dark"] if user else None,
+    )
+
+
+templates.env.globals["scale"] = scale_of
+templates.env.globals["theme_css"] = theme_css
 templates.env.filters["initial"] = lambda s: (s or "?")[0].upper()
 templates.env.filters["steps"] = lambda raw: ai.steps(raw) if raw else []
 
@@ -386,6 +405,9 @@ def settings_ctx(con, user):
     return {
         "user": con.execute("SELECT * FROM users WHERE id = ?", (user["id"],)).fetchone(),
         "projects": projects_of(con, user),
+        "light_themes": themes.scheme_list("light"),
+        "dark_themes": themes.scheme_list("dark"),
+        "scales": SCALES,
     }
 
 
@@ -398,32 +420,22 @@ def settings_page(request: Request, con=Depends(db.get_db), user=Depends(current
 def save_settings(
     request: Request,
     display_name: str = Form(""),
-    theme: str = Form("auto"),
+    theme_light: str = Form(themes.DEFAULT_LIGHT),
+    theme_dark: str = Form(themes.DEFAULT_DARK),
     con=Depends(db.get_db),
     user=Depends(current_user),
 ):
-    if theme not in ("auto", "light", "dark"):
-        theme = "auto"
     with con:
         con.execute(
-            "UPDATE users SET display_name = ?, theme = ? WHERE id = ?",
-            (display_name.strip()[:40] or user["username"], theme, user["id"]),
+            "UPDATE users SET display_name = ?, theme_light = ?, theme_dark = ? WHERE id = ?",
+            (
+                display_name.strip()[:40] or user["username"],
+                themes.valid(theme_light, "light"),
+                themes.valid(theme_dark, "dark"),
+                user["id"],
+            ),
         )
     return RedirectResponse("/settings", status_code=303)
-
-
-@app.post("/settings/theme")
-def cycle_theme(
-    next: str = Form("/"),
-    theme: str = Form("auto"),
-    con=Depends(db.get_db),
-    user=Depends(current_user),
-):
-    if theme not in ("auto", "light", "dark"):
-        theme = "auto"
-    with con:
-        con.execute("UPDATE users SET theme = ? WHERE id = ?", (theme, user["id"]))
-    return RedirectResponse(next if next.startswith("/") else "/", status_code=303)
 
 
 @app.post("/settings/avatar")
