@@ -7,22 +7,21 @@
   <meta name="color-scheme" content="dark light">
   <title>{% block title %}focus{% endblock %}</title>
   <style>{{ theme_css(user) }}</style>
-  <link rel="stylesheet" href="/static/css/rose-pine.css?v=20261110a">
+  <link rel="stylesheet" href="/static/css/rose-pine.css?v=20261110c">
   <script src="/static/vendor/htmx.min.js" defer></script>
-  <script src="/static/js/confetti.js?v=20261110a" defer></script>
-  <script src="/static/js/app.js?v=20261110a" defer></script>
+  <script src="/static/js/confetti.js?v=20261110c" defer></script>
+  <script src="/static/js/app.js?v=20261110c" defer></script>
 </head>
 <body class="{% if request.url.path == '/' %}home{% else %}board{% endif %}">
 <div class="shell">
   <aside class="sidebar">
     <a class="brand" href="/"><span class="brand-flower" aria-hidden="true">🌸</span> focus</a>
 
-    <form class="side-search" action="/search" method="get" role="search">
-      <input type="hidden" name="page" value="1">
-      <input type="search" name="q" placeholder="search all" aria-label="search every project">
-    </form>
-
     <nav class="projects" aria-label="projects">
+      <form class="side-search" action="/search" method="get" role="search">
+        <input type="hidden" name="page" value="1">
+        <input type="search" name="q" placeholder="search all" aria-label="search every project">
+      </form>
       <a class="ramble-link" href="/ramble"><span class="ramble-spark" aria-hidden="true">✨</span> ramble</a>
       {% for p in projects %}
       <div class="project-row">

@@ -496,18 +496,25 @@ kbd {
     position: fixed;
     inset: 0;
     width: 100%;
-    overflow-y: auto;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 20px;
-    padding: 28px 20px 22px;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 16px;
+    padding: 26px 20px 18px;
     border-right: 0;
-    overflow: visible;
+    overflow: hidden;
   }
   body.home .brand { font-size: 26px; padding: 0; }
-  body.home .projects { overflow: visible; gap: 2px; }
+  body.home .projects {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  body.home .side-search { margin: 0 0 6px; }
   body.home .project { padding: 13px 12px; font-size: 15px; border-radius: 10px; }
   body.home .ramble-link { padding: 13px 12px; font-size: 15px; border-radius: 10px; }
+  body.home .side-search input { padding: 12px; font-size: 15px; border-radius: 10px; }
   body.home .new-project { margin-top: 4px; }
   body.home .new-project input { padding: 12px; font-size: 15px; }
   body.home .side-foot { flex-direction: column; align-items: stretch; gap: 10px; }
@@ -700,7 +707,9 @@ input, select, textarea, button { border-radius: 8px; }
     border: 0;
     border-radius: 0;
     box-shadow: none;
+    padding: 18px 16px 36px;
   }
+  .sheet-inner { min-height: 100%; }
 }
 
 /* ---------- inputs ---------- */
@@ -739,7 +748,7 @@ input, select, textarea, button { border-radius: 8px; }
   50% { opacity: .1; }
 }
 
-.side-search { margin: 0 0 10px; }
+.side-search { margin: 0 0 6px; }
 .side-search input {
   width: 100%;
   border: 1px solid var(--hl-low);
@@ -753,3 +762,22 @@ input, select, textarea, button { border-radius: 8px; }
 .side-search input::placeholder { color: var(--muted); }
 
 body.home .side-search input { padding: 12px; font-size: 15px; border-radius: 10px; }
+
+/* ---------- the sheet must never be wider than the screen ---------- */
+/* flex children default to min-width:auto, so one long row (tools, meta) used
+   to push the whole panel past the viewport on a phone */
+
+.sheet { overflow-x: hidden; }
+.sheet-head { gap: 8px; flex-wrap: wrap; }
+.sheet-form, .sheet-form > * { min-width: 0; }
+.sheet-title { width: 100%; min-width: 0; }
+.sheet-meta { flex-wrap: wrap; }
+.sheet-meta select { min-width: 0; max-width: 100%; }
+.sheet-tools { flex-wrap: wrap; justify-content: flex-end; }
+
+@media (max-width: 720px) {
+  /* "wider" is meaningless when the panel is already the screen */
+  #wide-toggle { display: none; }
+  .sheet-title { font-size: 17px; }
+  .sheet textarea { min-height: 32vh; }
+}
