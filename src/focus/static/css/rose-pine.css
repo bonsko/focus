@@ -698,3 +698,39 @@ input, select, textarea, button { border-radius: 8px; }
     box-shadow: none;
   }
 }
+
+/* ---------- inputs ---------- */
+
+#search {
+  border: 1px solid var(--hl-low);
+  border-radius: 10px;
+  padding: 8px 12px;
+  background: var(--surface);
+  color: var(--text);
+}
+#search:focus { outline: none; border-color: var(--iris); }
+#search::placeholder { color: var(--muted); }
+
+/* the add field shows its own placeholder so the caret can blink: the real
+   placeholder is transparent, this ghost sits in its place while the input is
+   empty */
+.add { position: relative; }
+.add .ghost {
+  position: absolute;
+  left: 4px;
+  top: 8px;
+  font-size: 17px;
+  line-height: 1.4;
+  color: var(--muted);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+.add:has(input:placeholder-shown) .ghost { opacity: 1; }
+.add input::placeholder { color: transparent; }
+.add .caret { margin-left: 4px; animation: caret-blink 1.15s ease-in-out infinite; }
+
+@keyframes caret-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .1; }
+}

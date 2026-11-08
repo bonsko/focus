@@ -19,6 +19,7 @@
 
 <form id="add-form" class="add" hx-post="/p/{{ project['id'] }}/tasks" hx-target="#list" hx-swap="innerHTML"
       hx-on::after-request="if (event.detail.successful) this.reset()">
+  <span class="ghost" aria-hidden="true">what's next?<span class="caret">_</span></span>
   <input id="new-task" name="title" placeholder="what's next?" autocomplete="off" maxlength="500" aria-label="new task">
 </form>
 
