@@ -197,7 +197,7 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
 
 .main {
   width: 100%;
-  max-width: 720px;
+  max-width: 800px;
   padding: 56px 32px 120px;
   margin: 0 auto;
 }
@@ -352,10 +352,20 @@ kbd {
 .sheet-form { display: flex; flex-direction: column; gap: 12px; }
 .sheet-title {
   border: 0;
+  min-height: 0;
+  max-height: none;
   padding: 4px 0;
   font-size: 18px;
+  line-height: 1.35;
+  font-family: inherit;
   border-radius: 0;
   background: none;
+  color: var(--text);
+  width: 100%;
+  min-width: 0;
+  resize: none;
+  overflow: hidden;
+  field-sizing: content;  /* the title wraps and grows instead of scrolling sideways */
 }
 .sheet-title:focus { outline: none; border-bottom: 1px solid var(--iris); }
 
@@ -371,7 +381,7 @@ kbd {
   overflow-wrap: anywhere;
 }
 
-.sheet textarea {
+.sheet textarea[name="notes"] {
   font-size: 13.5px;
   max-height: 62vh;
   overflow-y: auto;
@@ -778,7 +788,7 @@ input, select, textarea, button { border-radius: 8px; }
   /* "wider" is meaningless when the panel is already the screen */
   #wide-toggle { display: none; }
   .sheet-title { font-size: 17px; }
-  .sheet textarea { min-height: 32vh; }
+  .sheet textarea[name="notes"] { min-height: 32vh; }
 }
 
 /* a phone does not need the desktop scale cookie: zoom rescales the css
@@ -786,3 +796,9 @@ input, select, textarea, button { border-radius: 8px; }
 @media (max-width: 720px) {
   html { zoom: 1 !important; }
 }
+
+@media (max-width: 720px) {
+  .sheet-title { font-size: 17px; }
+}
+
+.hints kbd { color: var(--subtle); }

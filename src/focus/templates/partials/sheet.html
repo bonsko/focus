@@ -9,7 +9,7 @@
   </div>
 
   <form class="sheet-form" hx-post="/tasks/{{ task['id'] }}" hx-target="#list" hx-swap="innerHTML">
-    <input class="sheet-title" name="title" value="{{ task['title'] }}" maxlength="500" aria-label="task title">
+    <textarea class="sheet-title" name="title" rows="1" maxlength="500" aria-label="task title">{{ task['title'] }}</textarea>
     <div class="sheet-meta">
       <select name="project_id" aria-label="project">
         {% for p in projects %}
