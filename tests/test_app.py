@@ -77,7 +77,7 @@ def test_task_crud(client):
     assert db.connect().execute("SELECT count(*) FROM tasks").fetchone()[0] == 0
 
 
-def test_subtask_completion_shimmers(client):
+def test_subtask_completion_marks_done(client):
     client.post("/login", data={"username": "nat", "password": "a"})
     project_id = int(
         client.post("/projects", data={"name": "p"}, follow_redirects=False)
@@ -94,7 +94,7 @@ def test_subtask_completion_shimmers(client):
         data={"step": ["open it", "read it", "close it"], "done": ["1"]},
     )
     assert res.text.count('class="subtask') == 3
-    assert "shimmer" in res.text  # the second step was ticked on the way in
+    assert "shimmer" not in res.text  # the gradient effect is gone
 
     con = db.connect()
     subs = con.execute("SELECT * FROM subtasks WHERE task_id = ? ORDER BY position", (task_id,)).fetchall()
@@ -102,7 +102,7 @@ def test_subtask_completion_shimmers(client):
     con.close()
 
     res = client.post(f"/subtasks/{subs[0]['id']}/toggle")
-    assert "done shimmer" in res.text
+    assert 'class="subtask done"' in res.text
     assert (
         db.connect().execute("SELECT done FROM subtasks WHERE id = ?", (subs[0]["id"],)).fetchone()["done"]
         == 1

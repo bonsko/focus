@@ -76,7 +76,7 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: var(--rose);
+  color: var(--accent);
   font-size: 19px;
   font-weight: 600;
   letter-spacing: .12em;

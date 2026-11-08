@@ -7963,7 +7963,7 @@ MAP = (
     "pine",
     "foam",
     "iris",
-    None,
+    "accent",
     None,
 )
 DEFAULT_LIGHT = "rose-pine-dawn"
