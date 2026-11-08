@@ -53,7 +53,6 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
   display: grid;
   grid-template-columns: 208px minmax(0, 1fr);
   align-items: start;
-  min-height: 100vh;
   overflow-x: clip;
 }
 
@@ -494,10 +493,10 @@ kbd {
   body.board .sidebar { display: none; }
 
   body.home .sidebar {
-    position: static;
-    height: auto;
-    width: auto;
-    min-height: 100vh;
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    overflow-y: auto;
     flex-direction: column;
     align-items: stretch;
     gap: 20px;
@@ -519,7 +518,7 @@ kbd {
     grid-column: 1;
     grid-row: 1;
     max-width: none;
-    padding: 16px 16px 90px;
+    padding: 16px 16px 40px;
   }
   .hints { display: none; }
 }
@@ -694,8 +693,10 @@ input, select, textarea, button { border-radius: 8px; }
   .phone-back:hover { background: var(--hl-low); text-decoration: none; }
 
   .sheet {
-    width: 100vw;
-    max-width: 100vw;
+    left: 0;
+    right: 0;
+    width: auto;
+    max-width: none;
     border: 0;
     border-radius: 0;
     box-shadow: none;
@@ -737,3 +738,18 @@ input, select, textarea, button { border-radius: 8px; }
   0%, 100% { opacity: 1; }
   50% { opacity: .1; }
 }
+
+.side-search { margin: 0 0 10px; }
+.side-search input {
+  width: 100%;
+  border: 1px solid var(--hl-low);
+  border-radius: 9px;
+  padding: 7px 10px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+}
+.side-search input:focus { outline: none; border-color: var(--iris); }
+.side-search input::placeholder { color: var(--muted); }
+
+body.home .side-search input { padding: 12px; font-size: 15px; border-radius: 10px; }

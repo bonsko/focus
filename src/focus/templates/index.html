@@ -1,20 +1,23 @@
 {% extends "base.html" %}
-{% block title %}{{ project['name'] }} · focus{% endblock %}
+{% block title %}{{ project['name'] if project else 'search' }} · focus{% endblock %}
 {% block main %}
 <header class="page-head">
-  <h1>{{ project['name'] }}</h1>
+  <h1>{{ project['name'] if project else 'search' }}</h1>
+  {% if project %}
   <p class="hints">
     <kbd>n</kbd> new
     <kbd>j</kbd><kbd>k</kbd> move
     <kbd>x</kbd> done
     <kbd>/</kbd> search
   </p>
+  {% endif %}
 </header>
 
+{% if project %}
 <div class="search-row">
-  <input id="search" type="search" name="q" placeholder="search" autocomplete="off"
-         hx-get="/search" hx-target="#list" hx-swap="innerHTML"
-         hx-trigger="input changed delay:250ms, search" aria-label="search tasks">
+  <input id="search" type="search" name="q" placeholder="search this project" autocomplete="off"
+         hx-get="/search?project={{ project['id'] }}" hx-target="#list" hx-swap="innerHTML"
+         hx-trigger="input changed delay:250ms, search" aria-label="search tasks in {{ project['name'] }}">
 </div>
 
 <form id="add-form" class="add" hx-post="/p/{{ project['id'] }}/tasks" hx-target="#list" hx-swap="innerHTML"
@@ -22,6 +25,15 @@
   <span class="ghost" aria-hidden="true">what's next?<span class="caret">_</span></span>
   <input id="new-task" name="title" placeholder="what's next?" autocomplete="off" maxlength="500" aria-label="new task">
 </form>
+{% else %}
+<div class="search-row">
+  <form action="/search" method="get" role="search">
+    <input type="hidden" name="page" value="1">
+    <input id="search" type="search" name="q" value="{{ query or '' }}" placeholder="search everything"
+           autocomplete="off" aria-label="search all projects" autofocus>
+  </form>
+</div>
+{% endif %}
 
 <div id="list">
   {% include "partials/task_list.html" %}

@@ -306,3 +306,26 @@ def test_home_is_the_menu_and_a_project_is_the_board(client):
     board = client.get(f"/p/{project_id}")
     assert board.status_code == 200
     assert '<body class="board"' in board.text
+
+
+def test_search_is_scoped_inside_a_project_and_global_on_the_results_page(client):
+    client.post("/login", data={"username": "nat", "password": "a"})
+    ids = {}
+    for name in ("alpha", "beta"):
+        client.post("/projects", data={"name": name})
+        con = db.connect()
+        ids[name] = con.execute(
+            "SELECT id FROM projects WHERE name = ? AND user_id = (SELECT id FROM users WHERE username='nat')",
+            (name,),
+        ).fetchone()["id"]
+        con.close()
+        client.post(f"/p/{ids[name]}/tasks", data={"title": f"needle in {name}"})
+
+    scoped = client.get(f"/search?q=needle&project={ids['alpha']}").text
+    assert "needle in alpha" in scoped
+    assert "needle in beta" not in scoped
+
+    everywhere = client.get("/search?q=needle&page=1")
+    assert everywhere.status_code == 200
+    assert "<h1>search</h1>" in everywhere.text
+    assert "needle in alpha" in everywhere.text and "needle in beta" in everywhere.text

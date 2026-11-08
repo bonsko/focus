@@ -252,8 +252,33 @@ def notice(message: str) -> Response:
 
 
 @app.get("/search")
-def search(request: Request, q: str = "", con=Depends(db.get_db), user=Depends(current_user)):
-    return render_list(request, con, user, query=q.strip() or None)
+def search(
+    request: Request,
+    q: str = "",
+    project: int | None = None,
+    page: bool = False,
+    con=Depends(db.get_db),
+    user=Depends(current_user),
+):
+    """Live filter inside a project (htmx), or a full results page across all of them."""
+    query = q.strip()[:200] or None
+    if project is not None:
+        owned(con, user, "projects", project)
+    tasks = task_query(con, user, project, query)
+    if not page:
+        return render_list(request, con, user, project_id=project, query=query)
+    return templates.TemplateResponse(
+        request,
+        "index.html",
+        {
+            "user": user,
+            "projects": projects_of(con, user),
+            "project": None,
+            "tasks": tasks,
+            "query": query,
+            "project_id": None,
+        },
+    )
 
 
 # ---------------------------------------------------------------- tasks
