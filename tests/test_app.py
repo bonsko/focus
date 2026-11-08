@@ -1,4 +1,8 @@
-from focus import ai, auth, db
+import io
+
+from PIL import Image
+
+from focus import ai, auth, config, db
 
 
 def test_unknown_username_registers_and_logs_in(client):
@@ -235,3 +239,54 @@ def test_scale_cookie_is_clamped(client):
     assert 'zoom:1.25"' in client.get("/login").text
     client.cookies.set("focus_scale", "9")
     assert 'zoom:1"' in client.get("/login").text
+
+
+def _png_with_alpha(size=200):
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    img.paste((90, 60, 160, 255), (size // 4, size // 4, size * 3 // 4, size * 3 // 4))
+    buf = io.BytesIO()
+    img.save(buf, "PNG")
+    return buf.getvalue()
+
+
+def test_avatar_keeps_transparency(client):
+    client.post("/login", data={"username": "nat", "password": "a"})
+    res = client.post(
+        "/settings/avatar",
+        files={"avatar": ("me.png", _png_with_alpha(), "image/png")},
+    )
+    assert res.status_code == 200
+
+    con = db.connect()
+    stored = con.execute("SELECT avatar FROM users WHERE username = 'nat'").fetchone()["avatar"]
+    con.close()
+    assert stored == "1.webp"
+
+    saved = Image.open(config.AVATARS / stored)
+    assert saved.mode == "RGBA"
+    assert saved.getextrema()[3][0] == 0, "fully transparent pixels survived the re-encode"
+
+
+def test_avatar_rejects_binaries_and_oversize(client):
+    client.post("/login", data={"username": "nat", "password": "a"})
+    before = set(config.AVATARS.glob("*.webp"))
+
+    res = client.post("/settings/avatar", files={"avatar": ("evil.exe", b"MZ\x90\x00" + b"\x00" * 4000)})
+    assert res.status_code == 400
+    assert "not an image" in res.text
+
+    res = client.post(
+        "/settings/avatar",
+        files={"avatar": ("big.png", b"\x89PNG\r\n\x1a\n" + b"0" * (2 * 1024 * 1024))},
+    )
+    assert res.status_code == 400
+    assert "bigger than 2 MB" in res.text
+
+    assert set(config.AVATARS.glob("*.webp")) == before, "nothing was written for either attempt"
+
+
+def test_avatar_path_cannot_escape(client):
+    client.post("/login", data={"username": "nat", "password": "a"})
+    assert client.get("/avatars/999.webp").status_code == 404
+    assert client.get("/avatars/..%2F..%2Fetc%2Fpasswd.webp").status_code == 404
+    assert client.get("/avatars/evil.svg").status_code == 404

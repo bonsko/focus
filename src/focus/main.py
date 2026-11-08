@@ -1,6 +1,8 @@
 """focus — a quiet task list. FastAPI + sqlite + htmx, no build step."""
 
+import io
 import json
+import re
 import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -438,6 +440,11 @@ def save_settings(
     return RedirectResponse("/settings", status_code=303)
 
 
+MAX_AVATAR_BYTES = 2 * 1024 * 1024
+AVATAR_FORMATS = {"PNG", "JPEG", "GIF", "WEBP", "BMP"}
+AVATAR_SIDE = 4096
+
+
 @app.post("/settings/avatar")
 def upload_avatar(
     request: Request,
@@ -445,18 +452,39 @@ def upload_avatar(
     con=Depends(db.get_db),
     user=Depends(current_user),
 ):
-    try:
-        image = ImageOps.exif_transpose(Image.open(avatar.file)).convert("RGB")
-    except (UnidentifiedImageError, OSError):
+    def refuse(message: str):
         return templates.TemplateResponse(
             request,
             "settings.html",
-            settings_ctx(con, user) | {"error": "that is not an image"},
+            settings_ctx(con, user) | {"error": message},
             status_code=400,
         )
-    image.thumbnail((96, 96))
+
+    # read with a ceiling: nothing downstream sees more than this many bytes
+    data = avatar.file.read(MAX_AVATAR_BYTES + 1)
+    if len(data) > MAX_AVATAR_BYTES:
+        return refuse("that file is bigger than 2 MB")
+
+    try:
+        probe = Image.open(io.BytesIO(data))
+        probe.verify()  # structural check, leaves the object unusable
+        image = Image.open(io.BytesIO(data))
+    except (UnidentifiedImageError, OSError, Image.DecompressionBombError, ValueError):
+        return refuse("that is not an image")
+
+    # the only gate that matters: it has to be a bitmap format we re-encode.
+    # svg, html, zip and friends never get this far, and re-encoding drops any
+    # payload smuggled after the image data
+    if image.format not in AVATAR_FORMATS:
+        return refuse("unsupported image type")
+    if max(image.size) > AVATAR_SIDE:
+        return refuse(f"that image is too large — {AVATAR_SIDE}px a side, tops")
+
+    # RGBA, not RGB: RGB is what threw the alpha channel away
+    image = ImageOps.exif_transpose(image).convert("RGBA")
+    image.thumbnail((96, 96), Image.LANCZOS)
     name = f"{user['id']}.webp"
-    image.save(config.AVATARS / name, "WEBP", quality=85)
+    image.save(config.AVATARS / name, "WEBP", quality=85, method=6)
     with con:
         con.execute("UPDATE users SET avatar = ? WHERE id = ?", (name, user["id"]))
     return RedirectResponse("/settings", status_code=303)
@@ -464,10 +492,20 @@ def upload_avatar(
 
 @app.get("/avatars/{name}")
 def avatar(name: str, con=Depends(db.get_db), user=Depends(current_user)):
-    path = config.AVATARS / name
-    if not name.endswith(".webp") or not path.is_file():
+    # digits only: "{id}.webp" can never walk out of the avatars directory
+    if not re.fullmatch(r"\d+\.webp", name):
         raise HTTPException(404)
-    return FileResponse(path, media_type="image/webp", headers={"Cache-Control": "private, max-age=300"})
+    path = config.AVATARS / name
+    if not path.is_file():
+        raise HTTPException(404)
+    return FileResponse(
+        path,
+        media_type="image/webp",
+        headers={
+            "Cache-Control": "private, no-cache",
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
 
 
 # ---------------------------------------------------------------- ramble

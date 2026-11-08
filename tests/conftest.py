@@ -14,7 +14,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 from focus import config, db  # noqa: E402
 from focus.main import app  # noqa: E402
 
-TABLES = ("jobs", "subtasks", "tasks", "projects", "users")
+TABLES = ("rambles", "jobs", "subtasks", "tasks", "projects", "users")
 
 
 @pytest.fixture()
