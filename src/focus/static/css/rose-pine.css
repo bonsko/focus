@@ -512,9 +512,9 @@ kbd {
     overflow-y: auto;
   }
   body.home .side-search { margin: 0 0 6px; }
+  body.home .side-search input { padding: 12px; font-size: 15px; border-radius: 10px; }
   body.home .project { padding: 13px 12px; font-size: 15px; border-radius: 10px; }
   body.home .ramble-link { padding: 13px 12px; font-size: 15px; border-radius: 10px; }
-  body.home .side-search input { padding: 12px; font-size: 15px; border-radius: 10px; }
   body.home .new-project { margin-top: 4px; }
   body.home .new-project input { padding: 12px; font-size: 15px; }
   body.home .side-foot { flex-direction: column; align-items: stretch; gap: 10px; }
@@ -761,7 +761,6 @@ input, select, textarea, button { border-radius: 8px; }
 .side-search input:focus { outline: none; border-color: var(--iris); }
 .side-search input::placeholder { color: var(--muted); }
 
-body.home .side-search input { padding: 12px; font-size: 15px; border-radius: 10px; }
 
 /* ---------- the sheet must never be wider than the screen ---------- */
 /* flex children default to min-width:auto, so one long row (tools, meta) used
