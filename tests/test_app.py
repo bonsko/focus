@@ -315,7 +315,8 @@ def test_search_is_scoped_inside_a_project_and_global_on_the_results_page(client
         client.post("/projects", data={"name": name})
         con = db.connect()
         ids[name] = con.execute(
-            "SELECT id FROM projects WHERE name = ? AND user_id = (SELECT id FROM users WHERE username='nat')",
+            "SELECT p.id FROM projects p JOIN users u ON u.id = p.user_id "
+            "WHERE p.name = ? AND u.username = 'nat'",
             (name,),
         ).fetchone()["id"]
         con.close()
