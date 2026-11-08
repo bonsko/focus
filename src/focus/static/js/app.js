@@ -27,7 +27,9 @@ function applyWide() {
   const sheet = document.getElementById('sheet');
   if (!sheet) return;
   const wide = localStorage.getItem(WIDE_KEY) === '1';
-  sheet.classList.toggle('wide', wide);
+  // on <html>, not the sheet: htmx replaces the sheet, and a class that arrives
+  // after the swap animates the panel from narrow to wide every time
+  document.documentElement.classList.toggle('wide', wide);
   const btn = sheet.querySelector('#wide-toggle');
   if (btn) {
     btn.textContent = wide ? 'narrower' : 'wider';

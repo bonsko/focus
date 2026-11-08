@@ -6,10 +6,10 @@
   <meta name="color-scheme" content="dark light">
   <title>{% block title %}focus{% endblock %}</title>
   <style>{{ theme_css(user) }}</style>
-  <link rel="stylesheet" href="/static/css/rose-pine.css?v=20261108d">
+  <link rel="stylesheet" href="/static/css/rose-pine.css?v=20261108e">
   <script src="/static/vendor/htmx.min.js" defer></script>
-  <script src="/static/js/confetti.js?v=20261108d" defer></script>
-  <script src="/static/js/app.js?v=20261108d" defer></script>
+  <script src="/static/js/confetti.js?v=20261108e" defer></script>
+  <script src="/static/js/app.js?v=20261108e" defer></script>
 </head>
 <body>
 <div class="shell">
@@ -17,6 +17,7 @@
     <a class="brand" href="/">focus</a>
 
     <nav class="projects" aria-label="projects">
+      <a class="ramble-link" href="/ramble">ramble ✦</a>
       {% for p in projects %}
       <div class="project-row">
         <a class="project{% if project and p['id'] == project['id'] %} active{% endif %}" href="/p/{{ p['id'] }}">{{ p['name'] }}</a>
@@ -25,7 +26,6 @@
                 hx-confirm="delete “{{ p['name'] }}”? it has to be empty.">×</button>
       </div>
       {% endfor %}
-      <a class="ramble-link" href="/ramble">ramble ✦</a>
       <form class="new-project" method="post" action="/projects">
         <input name="name" placeholder="+ project" maxlength="40" autocomplete="off" aria-label="new project">
       </form>

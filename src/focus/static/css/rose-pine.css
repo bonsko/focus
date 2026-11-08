@@ -111,7 +111,10 @@ input::placeholder, textarea::placeholder { color: var(--muted); }
 }
 .ramble-link:hover { color: var(--iris); text-decoration: none; }
 
-.project-row { display: flex; align-items: center; gap: 2px; }
+.project-row { display: flex; align-items: center; gap: 0; border-radius: 8px; }
+.project-row:hover { background: var(--hl-low); }
+.project-row:hover .project { background: transparent; }
+.project-row:hover .tiny { opacity: 1; }
 .project-row .project { flex: 1; min-width: 0; }
 .project-row .tiny {
   opacity: 0;
@@ -338,7 +341,7 @@ kbd {
   animation: slide-in .16s ease-out;
   transition: width .18s ease;
 }
-.sheet.wide { width: min(960px, 96vw); }
+.wide .sheet { width: min(960px, 96vw); }
 .sheet:empty { display: none; }
 /* a sheet swapped into a sheet is content, not a second panel */
 .sheet .sheet {
@@ -639,3 +642,19 @@ input, select, textarea, button { border-radius: 8px; }
   .sidebar { gap: 16px; padding-top: 18px; }
   .me { min-height: 40px; }
 }
+
+/* the divider belongs to the foot, not to a rounded chip */
+.me { border-top: 0; }
+.side-foot { border-top: 1px solid var(--hl-low); padding-top: 10px; }
+
+/* ramble sits above the projects and states itself */
+.ramble-link {
+  display: block;
+  margin: 0 0 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  border-radius: 8px;
+}
+.ramble-link:hover { background: var(--hl-low); text-decoration: none; }
